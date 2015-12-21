@@ -135,6 +135,8 @@ int getMax(int x, int y) {
 }
 
 int main() {
+	freopen("input.txt", "r", stdin);
+	freopen("output.txt", "w", stdout);
 	scanf("%d%d", &n, &m);
 	for (int i = 0; i < n; ++i) {
 		scanf("%d", a + i); --a[i];
