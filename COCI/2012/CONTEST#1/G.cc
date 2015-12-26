@@ -1,4 +1,8 @@
+#pragma comment(linker, "/STACK:66777216")
+#define _CRT_SECURE_NO_WARNINGS
 #include <cstdio>
+#include <stack>
+#include <sstream>
 #include <cstdlib>
 #include <cstring>
 #include <cassert>
@@ -13,8 +17,6 @@
 #include <set>
 #include <map>
 #include <iostream>
-#include <unordered_set>
-#include <unordered_map>
 using namespace std;
 
 //--------------------------------------------
@@ -31,7 +33,7 @@ using namespace std;
 #define rank rank1
 
 #ifdef _DEBUG_
-#define eprintf(...) fprintf(stderr, __VA_ARGS__);
+#define eprintf(...) fprintf(stderr, __VA_ARGS__)
 #else
 #define eprintf(...)
 #endif
@@ -62,48 +64,59 @@ const long long LINF = 6000000000000000000LL;
 
 namespace Solution {
 
-const int maxN = 555;
+const int maxM = 1555;
 
-int k, n, g[maxN][maxN], dp[maxN][maxN];
+long long k;
+int n, m, G[maxM], R[maxM], T[maxM];
 
 void cleanup() {
-    FILL(g, 0);
-    FILL(dp, 63);
+   FILL(G, 0);
+   FILL(R, 0);
 }
 
 bool Read() {
     cleanup();
-    if(scanf("%d", &k) == 1) {
-        n = 1 << k;
-        for(int i = 0; i < n; ++i) {
-            for(int j = 0; j < n; ++j) {
-                scanf("%d", &g[i][j]);
-            }
-        }
-        return true;
-    }
-    return false;
+	if(scanf(LLD "%d%d", &k, &m, &n) == 3) {
+		int u;
+		for(int i = 0; i < n; ++i) {
+			scanf("%d", &u);
+			G[u] = 1;
+		}
+		return true;
+	}
+	return false;
+}
+
+void mul(int F1[maxM], int F2[maxM]) {
+	FILL(T, 0);
+	for(int i = 0; i < m; ++i) {
+		if(F1[i]) {
+			for(int j = 0; j < m; ++j) {
+				if(F2[j]) {
+					T[(i * j) % m] += 1;
+				}
+			}
+		}
+	}
+	for(int i = 0; i < m; ++i) {
+		F1[i] = min(T[i], 1);
+	}
 }
 
 void Run() {
-    for(int i = 0; i < n; ++i) {
-        dp[0][i] = 0;
-    }
-    for(int i = 1; i < n; ++i) {
-        int lowBit = (i & -i);
-        for(int prev = 0; prev < n; ++prev) {
-            int l = (prev ^ lowBit) & (~(lowBit - 1));
-            int r = l + lowBit;
-            for( ; l < r; ++l) {
-                dp[i][prev] = min(dp[i][prev], dp[i - 1][l] + g[prev][l]);
-            }
-        }
-    }
-    int answer = IINF;
-    for(int i = 0; i < n; ++i) {
-        answer = min(answer, dp[n - 1][i]);
-    }
-    printf("%d\n", answer);
+	R[1] = 1;
+	for (unsigned long long mask = (1ll<<63); mask; mask >>=1) {
+		if(mask & k) {
+			mul(R, G);
+		}
+		mul(G, G);
+	}
+	for(int i = 0; i < m; ++i) {
+		if(R[i]) {
+			printf("%d ", i);
+		}
+	}
+	printf("\n");
 }
 
 } // Solution
@@ -111,31 +124,21 @@ void Run() {
 namespace StressTest {
 
 long long GetTime() {
-#ifdef __GNUC__ 
-    long long res; 
-    asm volatile ("rdtsc" : "=A" (res)); 
-    return res;
-#else
-    int low, hi; 
-    __asm { 
-        rdtsc
-        mov low, eax
-        mov hi, edx
-    }
-    return (((long long)hi) << 32LL) | low;
-#endif
+    srand(time(NULL));
+    return rand() << 16LL;
 }
 
 void GenerateInput() {
-    FILE* output = fopen("input.txt", "w");
+    FILE* output = fopen("C:\\Contests\\Templates\\input.txt", "w");
     srand(GetTime());
 
+    
     fclose(output);
 }
 
 void BruteForce() {
-    FILE* input = fopen("input.txt", "r");
-    FILE* output = fopen("brute.out", "w");
+    FILE* input = fopen("C:\\Contests\\Templates\\input.txt", "r");
+    FILE* output = fopen("C:\\Contests\\Templates\\brute.out", "w");
 
     fclose(input);
     fclose(output);
@@ -148,8 +151,8 @@ int main() {
     int test_id = 0;
 //    StressTest::GenerateInput();
 //    StressTest::BruteForce();
-    freopen("input.txt", "r", stdin);
-    freopen("output.txt", "w", stdout);
+    freopen("C:\\Contests\\Templates\\input.txt", "r", stdin);
+    freopen("C:\\Contests\\Templates\\output.txt", "w", stdout);
 #endif
 
     while(Solution::Read()) {
